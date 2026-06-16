@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="theme-color" content="#15181B">
+<title>How to use Muster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#15181B; --steel:#1B1F24; --panel:#20252B; --panel-2:#272D34;
+  --line:#343B43; --line-soft:#2A3037;
+  --bone:#EDE7DB; --bone-dim:#959BA2; --bone-faint:#666D75;
+  --brass:#C8973E; --brass-bright:#E2B257; --brass-deep:#8A6526;
+  --olive:#7C8A52; --oxblood:#9A463D;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--ink); color:var(--bone); -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+
+/* progress */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;background:rgba(255,255,255,.05)}
+.progress .bar{height:100%;background:linear-gradient(90deg,var(--brass-deep),var(--brass));width:0;transition:width .35s ease}
+
+/* deck */
+.deck{
+  display:flex; height:100%; width:100%;
+  overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.deck::-webkit-scrollbar{display:none}
+.slide{
+  flex:0 0 100%; width:100%; height:100%;
+  scroll-snap-align:center; scroll-snap-stop:always;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:64px 26px 104px;
+  position:relative; overflow-y:auto;
+}
+.slide-inner{max-width:540px;margin:0 auto;width:100%}
+.slide::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(900px 480px at 78% -8%, rgba(200,151,62,.07), transparent 60%);
+}
+
+/* entrance animation */
+.slide .anim{opacity:0;transform:translateY(14px)}
+.slide.live .anim{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+.slide.live .anim.d1{transition-delay:.05s}
+.slide.live .anim.d2{transition-delay:.14s}
+.slide.live .anim.d3{transition-delay:.23s}
+.slide.live .anim.d4{transition-delay:.32s}
+@media(prefers-reduced-motion:reduce){.slide .anim{opacity:1;transform:none}}
+
+/* type */
+.eyebrow{font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--brass);margin-bottom:16px}
+.step-no{font-family:'Anton';font-size:15px;letter-spacing:.04em;color:var(--brass-deep);margin-bottom:14px;display:inline-block}
+h1{font-family:'Anton';font-size:clamp(46px,15vw,78px);line-height:.9;letter-spacing:.02em;text-transform:uppercase;color:var(--bone)}
+h2{font-family:'Oswald';font-weight:700;font-size:clamp(26px,7.5vw,38px);line-height:1.05;letter-spacing:.02em;text-transform:uppercase;margin-bottom:16px}
+.lead{font-size:clamp(15px,4.2vw,18px);line-height:1.55;color:var(--bone-dim)}
+.lead b,.lead strong{color:var(--bone);font-weight:600}
+.lead.big{font-size:clamp(17px,4.6vw,20px);color:var(--bone)}
+.note{font-size:13.5px;line-height:1.55;color:var(--bone-faint);margin-top:18px;border-left:2px solid var(--brass-deep);padding-left:13px}
+
+ul.ticks{list-style:none;margin-top:18px;display:grid;gap:12px}
+ul.ticks li{position:relative;padding-left:30px;font-size:15.5px;line-height:1.5;color:var(--bone)}
+ul.ticks li b{color:var(--brass-bright);font-weight:600}
+ul.ticks li::before{content:"";position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:5px;border:1.5px solid var(--brass);background:rgba(200,151,62,.12)}
+ul.ticks li::after{content:"";position:absolute;left:6px;top:7px;width:5px;height:9px;border:solid var(--brass);border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+/* cover mark */
+.mark{width:96px;height:96px;border-radius:22px;background:linear-gradient(160deg,#2C333B,#1A1E23);border:1px solid var(--line);display:grid;place-items:center;margin-bottom:28px;box-shadow:0 16px 40px -16px rgba(0,0,0,.7)}
+.mark svg{width:62px;height:62px}
+
+/* swipe hint */
+.hint{display:flex;align-items:center;gap:10px;margin-top:38px;color:var(--brass);font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.hint svg{width:22px;height:22px;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+@media(prefers-reduced-motion:reduce){.hint svg{animation:none}}
+
+/* ===== mini mockups ===== */
+.mock{margin:22px 0 4px}
+
+/* 2x3 grid */
+.grid23{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1E2329,#191D22)}
+.grid23 .gr{display:grid;grid-template-columns:78px 1fr 1fr 1fr}
+.grid23 .gr+.gr{border-top:1px solid var(--line)}
+.grid23 .ch{padding:9px 4px;text-align:center;font-family:'Oswald';font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone);border-left:1px solid var(--line)}
+.grid23 .corner{font-size:8.5px;color:var(--bone-faint);display:flex;align-items:flex-end;padding:8px 6px;letter-spacing:.12em}
+.grid23 .rl{padding:14px 8px;display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.18)}
+.grid23 .rl svg{width:16px;height:16px}
+.grid23 .rl b{font-family:'Oswald';font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.grid23 .cl{border-left:1px solid var(--line);padding:14px 6px;text-align:center}
+.grid23 .cl .n{font-family:'Anton';font-size:26px;color:var(--brass)}
+.grid23 .cl .t{font-family:'Oswald';font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--bone-dim)}
+.pips{display:inline-flex;gap:2px;justify-content:center;margin-top:5px}
+.pip{width:10px;height:3px;border-radius:1px;background:var(--line)}
+.pip.on{background:var(--brass)}
+
+/* annotated cell */
+.cellbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;position:relative}
+.cellbox .top{display:flex;align-items:baseline;gap:8px}
+.cellbox .top .c{font-family:'Anton';font-size:34px;color:var(--brass)}
+.cellbox .top .ct{font-family:'Oswald';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bone-dim)}
+.cellbox .nx{font-size:14px;margin-top:10px;font-weight:500}
+.cellbox .when{font-family:'Oswald';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--brass);margin-top:5px;font-weight:600}
+.callouts{display:grid;gap:10px;margin-top:16px}
+.callouts div{font-size:13px;color:var(--bone-dim);padding-left:18px;position:relative}
+.callouts div::before{content:"→";position:absolute;left:0;color:var(--brass)}
+.callouts b{color:var(--bone)}
+
+/* chips */
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 11px;border-radius:6px;color:#15181B}
+.chip.plan{background:var(--bone-dim)}
+.chip.promo{background:var(--brass)}
+.chip.done{background:var(--olive);color:#10140a}
+.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.flow .arr{color:var(--brass);font-size:18px}
+
+/* fake button */
+.fakebtn{display:inline-flex;align-items:center;gap:9px;background:var(--brass);color:#1a1407;border-radius:40px;padding:12px 22px;font-family:'Oswald';font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.fakebtn svg{width:20px;height:20px}
+.fakebtn.ghost{background:var(--panel-2);color:var(--bone);border:1px solid var(--line)}
+
+/* mini timeline */
+.mtl{position:relative;padding-left:8px}
+.mtl .m{font-family:'Oswald';font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);margin:6px 0 10px 22px}
+.mtl .r{position:relative;padding-left:22px;padding-bottom:11px}
+.mtl .r::before{content:"";position:absolute;left:4px;top:6px;bottom:-6px;width:2px;background:var(--line)}
+.mtl .r:last-child::before{display:none}
+.mtl .nd{position:absolute;left:0;top:3px;width:11px;height:11px;border-radius:50%;border:2px solid var(--brass);background:var(--ink)}
+.mtl .nd.done{background:var(--olive);border-color:var(--olive)}
+.mtl .card{background:var(--panel);border:1px solid var(--line-soft);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:9px}
+.mtl .dt{font-family:'Oswald';font-weight:600;font-size:10px;color:var(--bone-dim);min-width:36px}
+.mtl .ti{font-family:'Oswald';font-weight:600;font-size:13px;flex:1}
+
+/* brother row */
+.brow{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:12px;margin-top:6px}
+.brow .av{width:38px;height:38px;border-radius:8px;display:grid;place-items:center;font-family:'Oswald';font-weight:700;background:linear-gradient(160deg,#2C333B,#1A1E23);border:1px solid var(--line);color:var(--brass)}
+.brow .nm{flex:1}
+.brow .nm b{font-family:'Oswald';font-weight:600;font-size:14px;display:block}
+.brow .nm span{font-size:11px;color:var(--bone-dim)}
+.brow .ico{width:32px;height:32px;border-radius:7px;border:1px solid var(--line);display:grid;place-items:center;color:var(--bone-dim)}
+.brow .ico svg{width:15px;height:15px}
+.brow .tn{font-family:'Anton';font-size:20px;color:var(--brass)}
+
+/* text bubble */
+.bubble{background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;border-bottom-left-radius:4px;padding:14px 16px;font-size:13px;line-height:1.55;color:var(--bone);white-space:pre-line;font-family:'Inter'}
+.bubble .h{font-family:'Oswald';font-weight:700;letter-spacing:.06em;color:var(--brass);margin-bottom:6px}
+
+/* install steps */
+.isteps{display:grid;gap:14px;margin-top:8px}
+.istep{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:14px}
+.istep .k{font-family:'Anton';font-size:20px;color:var(--brass);line-height:1;min-width:24px}
+.istep .x{font-size:14px;line-height:1.45}
+.istep .x b{font-family:'Oswald';font-weight:600;letter-spacing:.04em}
+.platform{font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--bone);margin:18px 0 10px;display:flex;align-items:center;gap:9px}
+.platform svg{width:18px;height:18px;color:var(--brass)}
+
+/* sync row */
+.synccard{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:16px;margin-top:6px;display:flex;align-items:center;gap:13px}
+.synccard .dot{width:11px;height:11px;border-radius:50%;background:var(--olive);box-shadow:0 0 10px var(--olive);flex:0 0 auto}
+.synccard b{font-family:'Oswald';letter-spacing:.04em}
+.synccard span{font-size:12.5px;color:var(--bone-dim);display:block;margin-top:2px}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--ink) 55%,transparent)}
+.navbtn{background:var(--panel-2);border:1px solid var(--line);color:var(--bone);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:.15s}
+.navbtn:hover{border-color:var(--brass-deep);color:var(--brass-bright)}
+.navbtn:disabled{opacity:.3;cursor:default}
+.navbtn svg{width:20px;height:20px}
+.dots{display:flex;gap:7px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+.dot.on{background:var(--brass);width:22px;border-radius:4px}
+.navbtn.next{background:var(--brass);color:#1a1407;border-color:var(--brass)}
+.navbtn.next:hover{background:var(--brass-bright)}
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 COVER -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="mark anim d1">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9h11l-1.2 3.2A4 4 0 0 1 9 14.8V17h4v2H7v-2v-2.4A6 6 0 0 1 2.4 9.6L3 9z" fill="#C8973E"/><path d="M14 9l4-2 1 1-3 2h-2z" fill="#8A6526"/><rect x="6" y="19" width="12" height="2" rx="1" fill="#8A6526"/></svg>
+      </div>
+      <div class="eyebrow anim d1">Elders Quorum Field Guide</div>
+      <h1 class="anim d2">Muster</h1>
+      <p class="lead big anim d3" style="margin-top:18px">The quorum's board for service and activities — across stake, ward, and quorum. Here's how to run it.</p>
+      <div class="hint anim d4">
+        <span>Swipe</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 THE BIG IDEA -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow anim d1">The whole idea</div>
+      <h2 class="anim d1">Two jobs. Three levels.</h2>
+      <p class="lead anim d2">Everything the quorum does is either <b>service</b> or an <b>activity</b> — happening at the <b>stake</b>, <b>ward</b>, or <b>quorum</b> level. That's the entire app.</p>
+      <div class="mock anim d3">
+        <div class="grid23">
+          <div class="gr">
+            <div class="ch corner">Pillar / Level</div>
+            <div class="ch">Stake<div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip on"></span></div></div>
+            <div class="ch">Ward<div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip"></span></div></div>
+            <div class="ch">Quorum<div class="pips"><span class="pip on"></span><span class="pip"></span><span class="pip"></span></div></div>
+          </div>
+          <div class="gr">
+            <div class="rl"><svg viewBox="0 0 24 24" fill="none" stroke="#C8973E" stroke-width="2"><path d="M14 7l-1.5-1.5a2.1 2.1 0 0 0-3 0L3 11.5 6.5 15l6.5-6.5M14 7l5-5 3 3-5 5-3-3M6.5 15l-3 3 1.5 1.5 3-3"/></svg><b>Service</b></div>
+            <div class="cl"><div class="n">1</div><div class="t">open</div></div>
+            <div class="cl"><div class="n">1</div><div class="t">open</div></div>
+            <div class="cl"><div class="n">2</div><div class="t">open</div></div>
+          </div>
+          <div class="gr">
+            <div class="rl"><svg viewBox="0 0 24 24" fill="none" stroke="#EDE7DB" stroke-width="2"><path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1.5.7-2.8 1.4-3.8M8.5 12.5C7 14 6 15.5 6 17a6 6 0 0 0 12 0c0-2-1.3-3.8-2.6-5"/></svg><b>Activity</b></div>
+            <div class="cl"><div class="n">1</div><div class="t">open</div></div>
+            <div class="cl"><div class="n">1</div><div class="t">open</div></div>
+            <div class="cl"><div class="n">2</div><div class="t">open</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="note anim d4">The bars under each level are the rank: stake is the widest reach (3), quorum is closest to home (1).</p>
+    </div>
+  </section>
+
+  <!-- 3 THE BOARD -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">The Board</div>
+      <h2 class="anim d1">One glance, the whole picture</h2>
+      <p class="lead anim d2">Each square shows how many things are open and what's next. Tap a square to jump straight into that list.</p>
+      <div class="mock anim d3">
+        <div class="cellbox">
+          <div class="top"><span class="c">2</span><span class="ct">open</span></div>
+          <div class="nx">Move-in help for the Fonua family</div>
+          <div class="when">In 2 days</div>
+        </div>
+        <div class="callouts">
+          <div><b>2 open</b> — service projects still to do here</div>
+          <div><b>The title</b> — the very next thing coming up</div>
+          <div><b>In 2 days</b> — how soon, at a glance</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 ADD -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Adding things</div>
+      <h2 class="anim d1">Put it on the board in seconds</h2>
+      <p class="lead anim d2">Hit the <b>Add</b> button on any screen. Pick Service or Activity, choose the level, give it a name and a date. Done.</p>
+      <div class="mock anim d3" style="display:flex;gap:12px;flex-wrap:wrap">
+        <span class="fakebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add</span>
+      </div>
+      <ul class="ticks anim d4">
+        <li>It opens already set to wherever you're standing — add from the <b>Service</b> tab and it's a service item</li>
+        <li>Add a <b>point person</b> so everyone knows who owns it</li>
+        <li>Note <b>what's needed</b> — trucks, tools, a grill, strong backs</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5 STATUS -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Keeping it moving</div>
+      <h2 class="anim d1">Planned → Promoted → Done</h2>
+      <p class="lead anim d2">One tap moves an item forward. Promote it when you've announced it. Mark it done when it's over.</p>
+      <div class="mock anim d3">
+        <div class="flow">
+          <span class="chip plan">Planned</span>
+          <span class="arr">→</span>
+          <span class="chip promo">Promoted</span>
+          <span class="arr">→</span>
+          <span class="chip done">Done</span>
+        </div>
+      </div>
+      <p class="lead anim d4" style="margin-top:20px">When you mark something <b>done</b>, it asks how many brethren showed up — and for service, the hours. That's how the board remembers what the quorum actually accomplished.</p>
+    </div>
+  </section>
+
+  <!-- 6 TIMELINE -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">The Timeline</div>
+      <h2 class="anim d1">See the whole year</h2>
+      <p class="lead anim d2">On the Board, switch to <b>Timeline</b> to see everything laid out by month — the full rhythm, and any gaps you need to fill. Tap any item to edit it.</p>
+      <div class="mock anim d3">
+        <div class="mtl">
+          <div class="m">This month</div>
+          <div class="r"><span class="nd done"></span><div class="card"><span class="dt">Wed 10</span><span class="ti">Snow removal rotation</span></div></div>
+          <div class="r"><span class="nd"></span><div class="card"><span class="dt">Sat 20</span><span class="ti">Yard cleanup — Sis. Tupou</span></div></div>
+          <div class="m">Next month</div>
+          <div class="r"><span class="nd"></span><div class="card"><span class="dt">Mon 6</span><span class="ti">Stake temple trip</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 BRETHREN -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Brethren</div>
+      <h2 class="anim d1">Your call list, and who shows up</h2>
+      <p class="lead anim d2">Add the quorum once. Then call or text any brother in a single tap when you need hands.</p>
+      <div class="mock anim d3">
+        <div class="brow">
+          <div class="av">SL</div>
+          <div class="nm"><b>Sione Latu</b><span>Quorum President</span></div>
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div>
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 20l1.3-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg></div>
+          <div class="tn">6</div>
+        </div>
+      </div>
+      <p class="lead anim d4" style="margin-top:18px">Tap <b>+1</b> each time a brother turns out. The <b>Muster Roll</b> quietly tracks who's carrying the load — recognition men actually feel.</p>
+    </div>
+  </section>
+
+  <!-- 8 ANNOUNCEMENTS -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Announcements</div>
+      <h2 class="anim d1">One tap to the group text</h2>
+      <p class="lead anim d2">In <b>Tools</b>, hit <b>Copy this week's announcements</b>. Muster builds a clean list of what's coming. Paste it straight into the quorum thread.</p>
+      <div class="mock anim d3">
+        <div class="bubble"><span class="h">ELDERS QUORUM — NEXT 2 WEEKS</span>SERVICE
+• [Quorum] Move-in help — Sat, Jun 21
+   Bring: trucks, strong backs
+
+ACTIVITIES
+• [Quorum] Brotherhood BBQ — Fri, Jun 20
+
+Put your shoulder to the wheel.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 SYNC -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Shared &amp; live</div>
+      <h2 class="anim d1">One board, the whole presidency</h2>
+      <p class="lead anim d2">Muster syncs in the cloud. When one of you adds or updates something, everyone sees it — instantly.</p>
+      <div class="mock anim d3">
+        <div class="synccard">
+          <span class="dot"></span>
+          <div><b>Cloud synced</b><span>The green light up top means you're connected and shared.</span></div>
+        </div>
+      </div>
+      <ul class="ticks anim d4">
+        <li>Works <b>offline</b> too — changes sync when signal comes back</li>
+        <li>Hand it to the next presidency by sharing the link, not retyping a year of work</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10 INSTALL -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">Put it on your phone</div>
+      <h2 class="anim d1">Add to Home Screen</h2>
+      <p class="lead anim d2">Install it like an app — no app store, just the anvil on your home screen.</p>
+
+      <div class="platform anim d3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg> iPhone — Safari</div>
+      <div class="isteps anim d3">
+        <div class="istep"><span class="k">1</span><span class="x">Open the board in <b>Safari</b> and tap the <b>Share</b> button (the square with the up-arrow).</span></div>
+        <div class="istep"><span class="k">2</span><span class="x">Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</span></div>
+      </div>
+
+      <div class="platform anim d4" style="margin-top:22px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg> Android — Chrome</div>
+      <div class="isteps anim d4">
+        <div class="istep"><span class="k">1</span><span class="x">Tap the <b>⋮</b> menu in the top-right.</span></div>
+        <div class="istep"><span class="k">2</span><span class="x">Tap <b>Install app</b> (or <b>Add to Home screen</b>).</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 RHYTHM -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="step-no anim d1">The weekly rhythm</div>
+      <h2 class="anim d1">How a presidency runs it</h2>
+      <ul class="ticks anim d2">
+        <li>In presidency meeting, open <b>The Board</b> — what's open, what's next</li>
+        <li><b>Promote</b> this week's items and name a point person for each</li>
+        <li>After an event, <b>mark it done</b> and log who came</li>
+        <li>Sunday: <b>copy the announcements</b> into the quorum text</li>
+        <li>Every quarter, check the <b>Timeline</b> for gaps and plan ahead</li>
+      </ul>
+      <p class="note anim d3">Keep it a planning board — what you planned, did, and who you reached. It's not a ministering record. Pastoral notes stay out.</p>
+    </div>
+  </section>
+
+  <!-- 12 CLOSE -->
+  <section class="slide">
+    <div class="slide-inner" style="text-align:center">
+      <div class="mark anim d1" style="margin:0 auto 28px">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9h11l-1.2 3.2A4 4 0 0 1 9 14.8V17h4v2H7v-2v-2.4A6 6 0 0 1 2.4 9.6L3 9z" fill="#C8973E"/><path d="M14 9l4-2 1 1-3 2h-2z" fill="#8A6526"/><rect x="6" y="19" width="12" height="2" rx="1" fill="#8A6526"/></svg>
+      </div>
+      <h2 class="anim d2">Put your shoulder<br>to the wheel</h2>
+      <p class="lead anim d3" style="margin-top:8px">Plan it. Promote it. Show up. Log it. That's Muster.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button class="navbtn prev" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <button class="navbtn next" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+
+<script>
+const deck=document.getElementById('deck');
+const slides=[...document.querySelectorAll('.slide')];
+const dotsWrap=document.getElementById('dots');
+const bar=document.getElementById('bar');
+const prev=document.getElementById('prev');
+const next=document.getElementById('next');
+let idx=0;
+
+slides.forEach((s,i)=>{
+  const d=document.createElement('div'); d.className='dot'+(i===0?' on':'');
+  d.addEventListener('click',()=>go(i)); dotsWrap.appendChild(d);
+});
+const dots=[...dotsWrap.children];
+
+function setLive(){
+  slides.forEach((s,i)=>s.classList.toggle('live',i===idx));
+}
+function update(){
+  dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  bar.style.width=((idx+1)/slides.length*100)+'%';
+  prev.disabled=idx===0;
+  next.disabled=idx===slides.length-1;
+  setLive();
+}
+function go(i){
+  idx=Math.max(0,Math.min(slides.length-1,i));
+  deck.scrollTo({left:idx*deck.clientWidth,behavior:'smooth'});
+  update();
+}
+prev.addEventListener('click',()=>go(idx-1));
+next.addEventListener('click',()=>go(idx+1));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ') {e.preventDefault();go(idx+1);}
+  if(e.key==='ArrowLeft') go(idx-1);
+});
+let st;
+deck.addEventListener('scroll',()=>{
+  clearTimeout(st);
+  st=setTimeout(()=>{
+    const i=Math.round(deck.scrollLeft/deck.clientWidth);
+    if(i!==idx){ idx=i; update(); }
+  },60);
+});
+window.addEventListener('resize',()=>deck.scrollTo({left:idx*deck.clientWidth}));
+update();
+</script>
+</body>
+</html>
